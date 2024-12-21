@@ -1,45 +1,174 @@
 import { useState } from 'react'
 
+
+const initialFormData = {
+  title: "",
+  author: "",
+  image: "",
+  content: "",
+  category: "",
+  available: false
+};
+
 function App() {
   // Definisce uno stato chiamato 'title' 
- const [title, setTitle ] = useState("");
+  const [articles, setArticles] = useState([]);
+  const [formData, setFormData] = useState(initialFormData);
 
- // Funzione per gestire il cambiamento del valore dell'input
- const handleChange = (event) => { 
-  const newValue = event.target.value;
-  console.log(newValue);
-  
-  setTitle(newValue);
- };
 
- // Funzione per gestire l'invio del form
- const handleSubmit = (event) => {
-  event.preventDefault();
-  
-};
+
+
+
+
+
+
+  // Funzione per gestire il cambiamento del valore dell'input
+  const handleInputChange = (event) => {
+    const keyToChange = event.target.name;
+
+
+    let newValue;
+    // Se l'input è checkbox
+    if (event.target.type === "checkbox") {
+      //il value da inserire sarà true o false, preso da target.checked
+      newValue = event.target.checked;
+    } else {
+      newValue = event.target.value;
+    }
+
+    const newData = {
+      ...formData,
+      [keyToChange]: newValue,
+    };
+
+    setFormData(newData);
+  };
+
+
+
+
+  // Funzione per gestire l'invio del form
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    //creo oggetto nuovo articolo
+    const newArticle = {
+      ...formData,
+      id: Date.now()
+    }
+
+    //creo copia degli articoli precedenti
+    const newArray = [...articles, newArticle];
+
+    //aggiorno stato menu
+    setArticles(newArray)
+
+    //ripulisco stati del form
+    setFormData(initialFormData);
+
+  };
+
+  const cancella = (idDaCancellare) => {
+    const newArray = articles.filter((curArt) => curArt.id !== idDaCancellare);
+    setArticles(newArray);
+  };
 
   return (
     <>
-      <header>
-        <h1></h1>
-      </header>
       <main className='container mt-5'>
-        <div className='row w-50'>
-          <form onSubmit={handleSubmit} >
-            <div className='mb-3'>
-              <label className='form-label' htmlFor="title">Titolo</label>
-              <input
-               className='form-control' 
-               type="text" id='title'
-               // Imposta il valore dell'input come 'title'
-               value = {title}
-               // Chiama handleChange quando il valore dell'input cambia
-               onChange={handleChange}
-               />
+
+        <section className='my-5'>
+          <h2>Articoli</h2>
+          {articles.length > 0 ? (
+            <div className="row row-cols-2 row-cols-lg-3">
+              {articles.map((curItem) => (
+                <div className="col" key={curItem.id}>
+                  <div className="card">
+                    <div className="card-body">
+                      <h4>{curItem.title}</h4>
+                      <p>{curItem.author}</p>
+                      <button
+                        onClick={() => cancella(curItem.id)}
+                        className="btn btn-warning"
+                      >
+                        <i className="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <button type="submit">Invia</button>
-          </form>
-        </div>
+          ) : (
+            <p>Nessun articolo presente</p>
+          )}
+        </section>
+
+
+        <section>
+          <div className='row w-50'>
+            <h3 className='mb-3'>Aggiungi un Articolo</h3>
+            <form onSubmit={handleSubmit} >
+
+              {/* //TITOLO*/}
+              <div className='mb-3'>
+                <label className='form-label' htmlFor="article-title">Titolo</label>
+                <input
+                  className='form-control w-50'
+                  type="text" id='article-title'
+                  name='title'
+                  // Imposta il valore dell'input
+                  value={formData.title || ""}
+                  // Chiama handleChange quando il valore dell'input cambia
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              {/* //AUTORE */}
+              <div className='mb-3 '>
+                <label className='form-label' htmlFor="article-author">Autore</label>
+                <input
+                  className='form-control w-50'
+                  type="text" id='article-author'
+                  name='author'
+                  // Imposta il valore dell'input 
+                  value={formData.author || ""}
+                  // Chiama handleImputChange quando il valore dell'input cambia
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              {/* //CONTENUTO*/}
+              <div className='mb-3'>
+                <label className='form-label' htmlFor="article-content">Contenuto</label>
+                <textarea
+                  className='form-control '
+                  type="text" id='article-content'
+                  name='content'
+                  // Imposta il valore dell'input
+                  value={formData.content || ""}
+                  // Chiama handleChange quando il valore dell'input cambia
+                  onChange={handleInputChange}
+                />
+              </div>
+
+
+              <div className="my-3">
+                <label htmlFor="available">Pubblica</label>
+                <input
+                  id="available"
+                  type="checkbox"
+                  name="available"
+                  checked={formData.available}
+                  onChange={handleInputChange}
+                />
+                <div></div>
+              </div>
+
+              <button type="submit" className="btn btn-success">Aggiungi</button>
+            </form>
+
+          </div>
+        </section>
       </main>
     </>
   )
